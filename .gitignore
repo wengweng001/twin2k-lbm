@@ -1,0 +1,8 @@
+data/raw/
+poc/data/
+poc/ckpt_*/
+poc/logs/
+.venv/
+__pycache__/
+*.pyc
+.DS_Store

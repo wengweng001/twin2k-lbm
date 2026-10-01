@@ -1,0 +1,45 @@
+{
+  "arm": "held_out",
+  "model": "HuggingFaceTB/SmolLM2-135M",
+  "n_train": 10000,
+  "n_test": 33329,
+  "n_test_pids": 411,
+  "eval_limit": null,
+  "band": 0.15393940009082596,
+  "results": {
+    "B1 population mode": {
+      "accuracy": 0.5397033961144857,
+      "var_ratio": 0.0,
+      "collapsed_frac": 1.0
+    },
+    "B4 copy-forward (= retest line)": {
+      "accuracy": 0.6936427962053117,
+      "var_ratio": 1.0010933117840002,
+      "collapsed_frac": 0.0
+    },
+    "base model (untuned)": {
+      "accuracy": 0.36325848411470224,
+      "var_ratio": 0.0,
+      "collapsed_frac": 0.9619047619047619
+    },
+    "fine-tuned": {
+      "accuracy": 0.4853565109795323,
+      "var_ratio": 0.2635259800734505,
+      "collapsed_frac": 0.19047619047619047
+    }
+  },
+  "ci": {
+    "vs B1": [
+      -0.060855271837775914,
+      -0.04764468520868505
+    ],
+    "vs B4": [
+      -0.21623032787354043,
+      -0.19994179995311534
+    ],
+    "vs base": [
+      0.11089280995520956,
+      0.1324523116585411
+    ]
+  }
+}
