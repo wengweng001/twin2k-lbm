@@ -173,9 +173,10 @@ the time.
 
 ---
 
-## 6. Acceptance criteria
+## 6. Full-build acceptance criteria
 
-Explicit, pre-registered, with the comparator attached.
+Explicit, pre-registered criteria for the full LBM build, with the comparator attached.
+The bonus POC is not expected to satisfy these thresholds.
 
 ### Must pass (ship blockers)
 

@@ -214,7 +214,7 @@ reaching for RLHF because it is fashionable.
 
 | Risk | Why it is live here | Mitigation |
 |---|---|---|
-| **Leakage via `full_persona`** | 100.0% of wave-4 answers present (`reports/02`) | Banned in the loader; automated string-match test on every built prompt |
+| **Leakage via `full_persona`** | 100.0% of wave-4 answers present (`reports/02`) | Banned in the loader; POC tests forbid `full_persona` imports outside the audit; production S2 should add string-match checks on every prompt |
 | **Leakage via the README snippet** | Ships input == ground truth | Strip `Answers` in the loader, not in the caller |
 | **Variance collapse** | Median ratio 0.48 across the 13 distinct systems | Sampled decoding, soft targets, temperature calibration, variance ratio as a *blocking* metric |
 | **Beating the benchmark without being useful** | Benchmark has 0 novel items | S2 block-held-out split is the primary reporting split |
