@@ -38,10 +38,12 @@ split_file:        data/derived/splits.json@<sha>
 decode:            {n: 20, temperature: 1.0, seed: 0}
 ```
 
-Rules:
+Production rules:
 - **Never a floating model alias.** `gpt-4.1-mini` without a dated suffix is not a version.
 - The HF dataset revision is pinned by commit sha, because HF datasets are mutable.
-- Splits are committed, not regenerated. A regenerated split silently changes the test set.
+- Evaluation splits, including the S2 block-held-out split proposed in `docs/03_evaluation.md`,
+  are committed once implemented, not regenerated. A regenerated split silently changes the
+  test set.
 - Every metric in every report carries its `run_id`. A number without one is deleted, not
   debated.
 

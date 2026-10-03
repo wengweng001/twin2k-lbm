@@ -115,15 +115,17 @@ within-subject experiments make this computable.
 | Split | Held out | Reports on | Primary? |
 |---|---|---|---|
 | **S1 person** | 20% of pids | C1 denoising | secondary |
-| **S2 block** | 20% of pids, *and* whole question blocks removed from their persona | C2 generalisation to unseen items | **primary** |
+| **S2 block** | 20% of pids, *and* whole question blocks removed from their persona and from training targets | C2 generalisation to unseen item families | **primary for the full build** |
 | **S3 cell** | stratified by demographic cell | fairness | blocking |
 
-S2 is primary because S1 cannot distinguish a behaviour model from a lookup table — 0 of
-126 wave-4 columns are novel, so on S1 copying is always available. S2 is constructed by us;
-the dataset ships no such split.
+S2 is primary for the full build because S1 cannot distinguish a behaviour model from a
+lookup table — 0 of 126 wave-4 columns are novel, so on S1 copying is always available. The
+dataset ships no such split, and this submission does **not** implement it end to end.
 
-Splits are seeded, serialised to `data/derived/splits.json`, and committed. Model selection
-uses S2; S1 is reported but never optimised against.
+For the full build, splits should be seeded, serialised to `data/derived/splits.json`, and
+committed. Model selection should use S2; S1 should be reported but never optimised
+against. The bonus POC uses a simpler participant split plus target-item removal from each
+prompt, not S2.
 
 ### 4.2 Uncertainty
 
@@ -157,10 +159,13 @@ Five vectors, four verified in `reports/02`:
    known cutoffs alongside, and mark frontier-model prompting numbers as
    upper-bounds-of-unknown-validity rather than clean measurements.
 
-**Enforcement is a test, not a convention.** CI runs `tests/test_no_leakage.py`, which
-builds a prompt for every split and asserts that no wave-4 answer string occurs in it, and
-that `full_persona` is never imported. A leak should break the build, not get caught in
-review.
+**Enforcement is a test, not a convention, but the current test covers only the POC.**
+`tests/test_no_leakage.py` checks that `full_persona` is not imported outside the audit,
+that the held-out POC prompt does not include the target item, that the copy-forward field
+stores the wave1-3 answer, that the supervised label is the wave-4 answer, that participant
+splits do not overlap, and that population mode is fit on train participants. It does not
+yet string-match every possible wave-4 answer across every future prompt template, and it
+does not cover an unimplemented S2 pipeline. A production build should add those checks.
 
 **Tripwire:** any result above ~0.75 accuracy on the repeated-item set should be treated as
 a suspected leak until proven otherwise. Human beings only agree with themselves 0.612 of
@@ -207,6 +212,10 @@ Honesty items, since the assignment asks for them:
 
 - The treatment-effect recovery metric is specified but not implemented; I have confirmed
   the experiments exist in the catalog but have not computed a single effect size.
+- The S2 block-held-out split is specified as the right primary evaluation for a full LBM,
+  but this repository does not include `data/derived/splits.json` or an S2 dataset builder.
+  The POC `held_out` arm is weaker: it removes the target item from a person's prompt, but
+  the same target item can appear in training examples for other people.
 - The US population benchmarks in `reports/05` are approximate ACS/CPS figures entered by
   hand, adequate for showing direction and rough magnitude of skew, not for reweighting.
 - The POC (deliverable 6) tests the loop, not the plan. It is far too small to say anything

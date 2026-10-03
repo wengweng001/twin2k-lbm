@@ -197,8 +197,11 @@ learned trait vector. The POC uses SmolLM2-135M because the bonus asks for a tin
 and because a free Colab T4 can run it end-to-end quickly enough to validate the data
 pipeline, leakage controls, comparator ladder, and evaluation code.
 
-The POC fine-tunes SmolLM2-135M on the `held_out` arm: the target item and its
-near-duplicates are removed from the persona, so copying is impossible. Configuration:
+The POC fine-tunes SmolLM2-135M on the `held_out` arm: for each test example, the target
+item and its near-duplicates are removed from that person's prompt, so copying that
+person's earlier answer is impossible. This is a **no-copy repeated-item POC**, not the S2
+block-held-out generalisation split proposed in the evaluation plan: the target columns
+themselves are still present in training examples for other participants. Configuration:
 10,000 training examples, 1 epoch, full evaluation on 33,329 held-out test pairs over 411
 participants.
 
@@ -217,6 +220,11 @@ over participants, 400 resamples:
 | fine-tuned vs base | **[+0.111, +0.132]** |
 | fine-tuned vs B1 population mode | [−0.061, −0.048] |
 | fine-tuned vs B4 copy-forward | [−0.216, −0.200] |
+
+Scope note: these POC numbers are on a 105-column binary/short-ordinal slice where a
+single digit is a faithful target. The main exploration baseline of population mode =
+0.471 is on all 126 wave-4 columns. The POC population mode = 0.5397 is therefore not the
+same test set and should not be compared directly to the all-column baseline table.
 
 **The loop works, but the model has not learned useful personalisation.** Fine-tuning moves
 the model significantly above the untuned base, so data → train → eval is real. But the
@@ -290,6 +298,9 @@ claim that a 135M model is a competitive LBM.
 - **Treatment-effect recovery** — the metric that tests the actual commercial claim — is
   specified but not implemented.
 - The **Tier-0 IRT/low-rank model is a prediction, not a result.** I have not run it.
+- The **S2 block-held-out split is specified but not implemented** in this repo. The POC
+  `held_out` arm removes the target item from a person's prompt, but does not hold out
+  entire unseen question blocks from training.
 - US census benchmarks are approximate ACS/CPS figures entered by hand, adequate for
   direction and rough magnitude, not for reweighting.
 - The POC tests the loop, not the plan. It is three orders of magnitude too small to say
@@ -302,6 +313,10 @@ claim that a 135M model is a competitive LBM.
 - The shipped GPT-4.1 / GPT4.1-mini / Gemini predictions were **re-scored, not regenerated**.
   I did not have time to rerun those APIs and check whether the published CSVs match a fresh
   call under pinned prompts, model versions, and decoding settings.
+- `tests/test_no_leakage.py` is a POC guardrail, not a proof over every future workflow. It
+  checks `full_persona` references, POC prompt construction, participant splits, and
+  population-mode fitting; it does not string-match every possible wave-4 answer across
+  every future prompt template.
 
 ## Optional note: with more time
 

@@ -68,8 +68,11 @@ wave_split/            <- the ONLY legal source for personas
 full_persona/          <- BANNED. Contains wave-4 answers (100.0% verified, reports/02)
 ```
 
-Pipeline enforces this with an assertion, not a convention: a unit test loads each built
-prompt and fails if any wave-4 answer string appears in it. See `docs/03_evaluation.md` §5.
+The POC enforces the subset it implements with assertions, not convention: tests check that
+`full_persona` is not used, that the held-out prompt does not include the target item, that
+copy-forward stores the wave1-3 answer rather than the wave-4 answer, and that participant
+splits do not overlap. A production S2 pipeline should extend this to full string-level
+checks across every prompt template. See `docs/03_evaluation.md` §5.
 
 ### 3.2 Splits
 
@@ -78,11 +81,13 @@ Three splits, because they answer different questions:
 | Split | Unit held out | Tests | Notes |
 |---|---|---|---|
 | **S1 person** | 20% of pids | C1 denoising | Standard. Never split on (person, question) pairs — same person leaks. |
-| **S2 block** | 20% of pids × whole question *blocks* removed from the persona | C2 generalisation | The block's items are absent from the persona, so copying is impossible. This is the split the dataset does not ship and the one that matters. |
+| **S2 block** | 20% of pids × whole question *blocks* removed from the persona and from model selection/training targets | C2 generalisation | The block's items are absent from the persona and held out as target families. This is the split the dataset does not ship and the one that matters. |
 | **S3 cell** | stratified by demographic cell | fairness | Report per-cell, not pooled (`reports/05`). |
 
-Fixed seed, splits written to `data/derived/splits.json` and committed, so every
-experiment scores on identical people.
+For the full build, fixed splits should be written to `data/derived/splits.json` and
+committed, so every experiment scores on identical people and item blocks. This repo does
+not yet include that S2 split file; the bonus POC implements only a person split plus
+per-example target-item removal.
 
 ### 3.3 Example construction
 
