@@ -15,7 +15,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 sys.path.insert(0, str(ROOT / "poc"))
 
-POC_DATA = ROOT / "poc/data"
+PROTOTYPE_DATA = ROOT / "poc/data"
 
 
 def test_full_persona_is_never_imported() -> None:
@@ -45,7 +45,7 @@ def test_prompts_contain_no_wave4_answer() -> None:
     w13, w4 = load_responses()
     for arm in ("held_out", "same_item"):
         for split in ("train", "test"):
-            path = POC_DATA / f"{arm}_{split}.jsonl"
+            path = PROTOTYPE_DATA / f"{arm}_{split}.jsonl"
             if not path.exists():
                 continue
             n = 0
@@ -76,7 +76,7 @@ def test_prompts_contain_no_wave4_answer() -> None:
 def test_splits_are_by_participant() -> None:
     """Vector 4: splitting on (person, question) pairs puts the same person in both sides."""
     for arm in ("held_out", "same_item"):
-        tr, te = POC_DATA / f"{arm}_train.jsonl", POC_DATA / f"{arm}_test.jsonl"
+        tr, te = PROTOTYPE_DATA / f"{arm}_train.jsonl", PROTOTYPE_DATA / f"{arm}_test.jsonl"
         if not (tr.exists() and te.exists()):
             continue
         a = {json.loads(l)["pid"] for l in tr.read_text().splitlines() if l}
@@ -86,7 +86,7 @@ def test_splits_are_by_participant() -> None:
 
 def test_population_mode_excludes_test_participants() -> None:
     """A baseline fitted on the test set is not a baseline."""
-    meta = json.loads((POC_DATA / "meta.json").read_text())
+    meta = json.loads((PROTOTYPE_DATA / "meta.json").read_text())
     assert "pop_mode" in meta and meta["pop_mode"], "population-mode baseline missing"
     assert meta["n_train_pids"] + meta["n_test_pids"] == 2058
 

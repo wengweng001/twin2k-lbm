@@ -1,6 +1,6 @@
-# Deliverable 1 — Short Data Exploration Report
+# Report 1 - Data Exploration
 
-This short report shows what I checked before designing the model. The code that produced
+This report shows what I checked before designing the model. The code that produced
 the numbers is in `src/`; the generated evidence tables are in `reports/exploration/`.
 
 ## Dataset Structure
@@ -88,7 +88,7 @@ The education skew matters because the wave-4 target is made of cognitive and
 heuristics-and-biases tasks. A model trained here should be described as modelling this
 online panel, not the US population.
 
-## Code and Appendices
+## Code and More Findings
 
 | Topic | Generated appendix | Code |
 |---|---|---|

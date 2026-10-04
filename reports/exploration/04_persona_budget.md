@@ -21,7 +21,7 @@ measured figure.
 
 - A legal persona is ~**27,484 tokens** at the median (measured, not
   estimated). That fits a modern long-context model but is far too large for the
-  <0.5B models the bonus POC is restricted to (typically 2k-8k usable context).
+  <0.5B models the prototype is restricted to (typically 2k-8k usable context).
 - Naive prompting cost: 27,484 tokens x 126 questions x
   2,058 people ≈ 7.1B input tokens per full
   evaluation sweep if the persona is re-sent per question. Batch all 126 questions into

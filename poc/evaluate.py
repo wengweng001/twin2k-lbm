@@ -1,4 +1,4 @@
-"""Score the POC model against the comparator ladder from reports/03_evaluation_strategy.md.
+"""Score the prototype model against the comparator ladder from reports/03_evaluation_strategy.md.
 
 Reports, on the same test participants and the same valid pairs:
   B1 population mode   (computed on TRAIN pids only)
@@ -181,7 +181,7 @@ def main() -> None:
 
     band = acc_cf - acc_pop
     lines = ["", "=" * 74,
-             f"POC results  |  arm = {a.arm}  |  {len(rows):,} test pairs, "
+             f"Prototype results  |  arm = {a.arm}  |  {len(rows):,} test pairs, "
              f"{len({r['pid'] for r in rows})} held-out participants", "=" * 74,
              f"{'system':38s} {'accuracy':>10s} {'var ratio':>11s} {'collapsed':>11s} {'NS':>8s}"]
     for k, (acc, vr, cf_frac) in results.items():

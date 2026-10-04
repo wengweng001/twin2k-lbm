@@ -1,15 +1,15 @@
-"""Build the POC training/eval slice.
+"""Build the prototype training/eval slice.
 
 Task slice: wave-4 columns with small integer support (<=9 options), which covers the
 binary and short-ordinal families -- the bulk of the evaluation set and the only families
 where a single-token answer is a faithful representation.
 
-Two POC arms:
+Two prototype arms:
   arm A "same_item"  -- the person's own earlier answer to the target item is in the prompt.
                         Copying is available. Tests denoising (capability C1).
   arm B "held_out"   -- that answer is removed; only other items are shown.
                         Copying is impossible for that person. This is a no-copy
-                        repeated-item POC, not the full S2 unseen-block split from
+                        repeated-item prototype, not the full S2 unseen-block split from
                         reports/03_evaluation_strategy.md; target items still appear in training
                         examples for other participants.
 

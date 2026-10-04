@@ -1,6 +1,6 @@
 """Fine-tune a tiny causal LM to answer wave-4 items as a specific person.
 
-This is the bonus prototype, not the proposed Large Behavior Model. The default
+This is the lightweight prototype, not the proposed Large Behavior Model. The default
 SmolLM2-135M model is chosen because it runs end-to-end on a free Colab T4 and is large
 enough to validate the data, leakage guards, training loop, and evaluation ladder. The
 main modelling plan in reports/02_modeling_plan.md uses a 7B/8B-class model or a hybrid

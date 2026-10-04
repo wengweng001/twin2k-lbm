@@ -71,7 +71,7 @@ def main() -> None:
     A("## What this implies for the model\n")
     A(f"- A legal persona is ~**{tok_med:,.0f} tokens** at the median (measured, not")
     A("  estimated). That fits a modern long-context model but is far too large for the")
-    A("  <0.5B models the bonus POC is restricted to (typically 2k-8k usable context).")
+    A("  <0.5B models the prototype is restricted to (typically 2k-8k usable context).")
     A(f"- Naive prompting cost: {tok_med:,.0f} tokens x 126 questions x")
     A(f"  2,058 people ≈ {tok_med*126*2058/1e9:,.1f}B input tokens per full")
     A("  evaluation sweep if the persona is re-sent per question. Batch all 126 questions into")

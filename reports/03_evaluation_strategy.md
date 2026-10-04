@@ -1,223 +1,142 @@
-# Deliverable 3 — Evaluation strategy
+# Report 3 - Evaluation Strategy
 
-The evaluation target is fixed by the assignment: given a person's wave 1-3 persona,
-predict their wave-4 answers, score against the real wave-4 answers, and interpret the
-result relative to the human test-retest reference line. This document is organised around
-that: comparators first, metrics second, protocol third, acceptance criteria last.
+Task: given a person's wave 1-3 persona, predict that same person's wave-4 answers. A good model must beat trivial baselines, avoid leakage, work across question types, and preserve population-level behaviour.
 
----
+## 1. Dataset Features That Drive Evaluation
 
-## 1. The comparator ladder
+Wave 4 has **126 target columns** for the same 2,058 participants. All 126 targets appeared somewhere in waves 1-3, so the benchmark is mainly a repeated-item prediction task. That makes copy-forward an unusually strong baseline: use the person's earlier answer to the same item and score it against wave 4.
 
-A number without a comparator is not a result. Every reported score sits on this ladder.
+The dataset also mixes several response types:
 
-| # | Comparator | Value (measured) | What it rules out |
-|---|---|---|---|
-| B0 | Uniform random over valid options | — | nothing; sanity check only |
-| B1 | **Population mode / mean** per item | **0.471** | "the model just learned the item's marginal" |
-| B2 | Demographic-cell mode (age × sex × education) | **0.467** | "the model just learned demographics" — close to B1, so demographics alone do little |
-| B3 | kNN on the person's response vector | **0.486** | "the model just learned similarity between respondents" — essentially tied with the best shipped LLM |
-| B4 | **Copy-forward** — this person's earlier answer | **0.612** | "the model learned anything beyond repetition" |
-| C  | **Human test-retest** | **0.612** | — identical to B4 by construction |
-| — | Best shipped LLM (JSON Persona, GPT-4.1) | 0.488 | external reference point |
-
-Two facts about this ladder drive everything downstream.
-
-**B4 and C are the same number.** Test-retest is `P(wave-4 answer == the same person's
-earlier answer)`; copy-forward is `predict wave-4 with that earlier answer`. One
-computation. So "reached the human test-retest line" and "matched the strongest simple
-repeated-item baseline" are the same empirical claim.
-
-**C is not an upper bound.** A human re-test draw contains occasion noise; a model
-predicting the conditional mode does not. A genuinely good model *should* exceed C on point
-metrics. Treating C as a cap is a modelling error, and reporting "we approached the human
-ceiling" as a success is a communication error.
-
-**The band B1→B4 is 0.140 wide, 95% CI [0.137, 0.144].** Every claimed improvement is
-quoted as a fraction of this band, never as raw accuracy. The best shipped system captures
-about 12% of it.
-
----
-
-## 2. Metrics by question type
-
-Qualtrics `QuestionType` does not determine the metric — the same `Matrix` type covers
-2-point and 100-point items. Classify by observed support (`reports/exploration/01_structure_and_retest.md` §2b):
-
-| Observed scale | Cols | Primary metric | Secondary | Why not accuracy alone |
-|---|---:|---|---|---|
-| binary | 65 | **Cohen's κ** | accuracy | items run to 80/20; a constant predictor scores 0.80 |
-| ordinal_short (≤11 pts) | 43 | **MAE** | within-1 acc, κ | off-by-one ≠ off-by-four |
-| ordinal_long | 2 | MAE | Spearman | exact match too strict |
-| continuous | 14 | **normalised MAE** | Pearson | human retest exact agreement is 0.136 — exact match is noise |
-| numeric text-entry | 2 | normalised MAE | — | numeric fields, not prose |
-
-Human reliability per family (the reference line for each):
-
-| scale | retest exact | retest κ |
-|---|---:|---:|
-| binary | 0.809 | 0.534 |
-| ordinal_short | 0.501 | 0.326 |
-| ordinal_long | 0.328 | 0.211 |
-| continuous | 0.136 | — |
-
-κ is defined on 110 of 126 columns; it does not exist for continuous support. Report the
-denominator every time.
-
-**Aggregation.** Compute per column on valid pairs, then average over columns with equal
-weight. Pooling raw pairs lets the 40-column pricing block dominate the 1-column
-experiments and silently reweights the benchmark by participant count.
-
-**Normalised score.** For cross-family comparison:
-
-$$\text{NS} = \frac{\text{model} - \text{B1}}{\text{B4} - \text{B1}}$$
-
-NS=0 means no personalisation, NS=1 means copy-forward-equivalent, NS>1 means denoising.
-*Caveat, stated because it matters:* on items where B4 ≈ B1 the denominator collapses and
-NS explodes. Report NS only where B4−B1 > 0.05, and report the excluded columns.
-
----
-
-## 3. Distribution-level metrics (non-optional)
-
-Point accuracy alone is insufficient, and this is measurable, not theoretical. Across the
-13 shipped systems the median variance ratio is **0.48** (range 0.24–0.87); only one
-exceeds 0.85.
-
-The decisive number is a null result: the correlation between accuracy and variance ratio
-is **r = +0.06 (n = 13)** — effectively zero. It is not that the two trade off in some
-predictable way that a leaderboard could account for; it is that **accuracy carries no
-information at all about whether the simulated population is correctly dispersed.**
-Gemini-Flash-2.5 preserves variance best (0.87) while scoring near the bottom on accuracy;
-the second-most-accurate system is the second-most flattened (0.245). Knowing one number
-tells you nothing about the other.
-
-Variance therefore has to be measured and gated in its own right, which is why it appears
-below as a ship blocker rather than as a secondary metric.
-
-| Metric | Definition | Target |
+| Example family | What the model predicts | Evaluation implication |
 |---|---|---|
-| **Variance ratio** | var(predicted) / var(human), median over columns | 0.9 – 1.1 |
-| **Marginal TV distance** | per item, between predicted and human answer distributions | < 0.10 |
-| **Correlation-structure error** | Frobenius norm of (predicted − human) item-item correlation matrix, normalised | report; no threshold yet |
-| **Treatment-effect recovery** | for each between-subject experiment, does the simulated effect size CI overlap the human one? | ≥ 80% of experiments overlap |
+| binary choice | support/oppose, yes/no, option A/B | accuracy alone is fragile; use kappa and option-order robustness |
+| short ordinal | Likert-style 1-5 or 1-7 answers | distance matters; use MAE and within-1 accuracy |
+| continuous estimate | percentage estimates such as “what percentage of the public supports...” | exact match is too strict; use normalised MAE and correlation |
+| product pricing | willingness-to-pay / product preference items | personalization signal is strong; compare against copy-forward and population mode |
+| between-subject arms | only some participants saw each condition | NaN is often experimental design, not missingness; score per column on valid pairs |
 
-The last row is the commercial claim — "simulate the experiment instead of running it" — and
-it is the only metric that tests it directly. The dataset's 11 between-subject and 5
-within-subject experiments make this computable.
+The main leakage trap is `full_persona`: it contains wave-4 answers for repeated items. Legal model inputs must come from `wave_split`.
 
----
+## 2. Metrics by Question Type
 
-## 4. Protocol
+Metrics are chosen by observed answer support, not only by Qualtrics type.
 
-### 4.1 Splits
+| Question support | Columns | Primary metric | Secondary metrics |
+|---|---:|---|---|
+| binary | 65 | Cohen's kappa | accuracy, option-order robustness |
+| ordinal short, <=11 values | 43 | MAE | within-1 accuracy, kappa |
+| ordinal long | 2 | MAE | Spearman correlation |
+| continuous | 14 | normalised MAE | Pearson correlation |
+| numeric text entry | 2 | normalised MAE | exact agreement as diagnostic only |
 
-| Split | Held out | Reports on | Primary? |
-|---|---|---|---|
-| **S1 person** | 20% of pids | C1 denoising | secondary |
-| **S2 block** | 20% of pids, *and* whole question blocks removed from their persona and from training targets | C2 generalisation to unseen item families | **primary for the full build** |
-| **S3 cell** | stratified by demographic cell | fairness | blocking |
+Aggregation: compute each metric per column on valid pairs, then average columns with equal weight. Do not pool all person-question pairs, because the 40-column pricing block would dominate the score.
 
-S2 is primary for the full build because S1 cannot distinguish a behaviour model from a
-lookup table — 0 of 126 wave-4 columns are novel, so on S1 copying is always available. The
-dataset ships no such split, and this submission does **not** implement it end to end.
+Uncertainty: use participant-level bootstrap with 1,000 resamples. Do not bootstrap individual person-question pairs; answers from the same person are correlated.
 
-For the full build, splits should be seeded, serialised to `data/derived/splits.json`, and
-committed. Model selection should use S2; S1 should be reported but never optimised
-against. The bonus POC uses a simpler participant split plus target-item removal from each
-prompt, not S2.
+## 3. Binary Option-Order Robustness
 
-### 4.2 Uncertainty
+Binary-choice prompts need an additional robustness test. The model may learn a position bias, such as preferring the first option, rather than using the persona.
 
-Percentile bootstrap, 1,000 resamples, **resampling participants, not (person, question)
-pairs** — answers within a person are correlated and pair-level resampling understates every
-interval. Every delta between systems carries a CI. Differences below ~0.01 accuracy are
-inside the noise of a 2,058-person sample and are not claims.
+For every binary item:
 
-### 4.3 Decoding
+1. Score the original option order.
+2. Randomly swap the two answer options.
+3. Remap the swapped prediction back to the canonical answer label.
+4. Compare original-order and swapped-order metrics.
 
-Sample $n$=20 completions per item at T≈1.0. Report mode for point metrics and the
-empirical distribution for §3. Greedy decoding is not an acceptable configuration for any
-distributional claim, and is the mechanical cause of the 0.48 variance ratio.
+Report:
 
----
+| Robustness metric | Meaning |
+|---|---|
+| original accuracy / kappa | normal binary score |
+| shuffled accuracy / kappa | score after option order is swapped and remapped |
+| remapped consistency | share of examples where original and shuffled predictions match after remapping |
+| position-flip rate | share of examples where the model follows position instead of semantic label |
 
-## 5. Leakage controls
+Acceptance: shuffled-order kappa should remain within 0.02 of original-order kappa, and remapped consistency should be at least 0.95 for deterministic decoding. A larger gap means the model is using prompt-position bias.
 
-Five vectors, four verified in `reports/exploration/02_leakage_audit.md`:
+## 4. Comparator Ladder
 
-1. **`full_persona` contains wave-4 ground truth.** Verified: 100.000% of wave-4 questions
-   carry the exact wave-4 answer across 18,900 audited pairs. Banned at the loader.
-2. **The dataset README's own usage snippet** passes `wave4_Q_wave4_A` as both prompt input
-   and ground truth. Stripping happens in the loader, never in caller code.
-3. **`wave4_Q_wave1_3_A` is a baseline, not an input.** Feeding it silently reconstructs
-   copy-forward and reports it as a model.
-4. **Split granularity.** Split on pid, never on (person, question). Add the S2 block split
-   or the model is scored on items it has memorised the marginal of.
-5. **Pretraining contamination.** Public on HF since 2025, ships GPT-4.1 and Gemini outputs.
-   Cannot be ruled out from inside the benchmark. Mitigation: report open-weight models with
-   known cutoffs alongside, and mark frontier-model prompting numbers as
-   upper-bounds-of-unknown-validity rather than clean measurements.
+Every model is compared against this ladder:
 
-**Enforcement is a test, not a convention, but the current test covers only the POC.**
-`tests/test_no_leakage.py` checks that `full_persona` is not imported outside the audit,
-that the held-out POC prompt does not include the target item, that the copy-forward field
-stores the wave1-3 answer, that the supervised label is the wave-4 answer, that participant
-splits do not overlap, and that population mode is fit on train participants. It does not
-yet string-match every possible wave-4 answer across every future prompt template, and it
-does not cover an unimplemented S2 pipeline. A production build should add those checks.
+| ID | Comparator | Measured value | Purpose |
+|---|---|---:|---|
+| B1 | population mode / mean per item | 0.471 | no-personalisation baseline |
+| B2 | demographic-cell mode | 0.467 | demographic-only baseline |
+| B3 | kNN on response vector | 0.486 | cheap similarity baseline |
+| B4 | copy-forward from the person's earlier answer | 0.612 | strongest repeated-item baseline |
+| C | human test-retest | 0.612 | human reliability reference |
+| LLM | best shipped LLM, JSON Persona GPT-4.1 | 0.488 | published model reference |
 
-**Tripwire:** any result above ~0.75 accuracy on the repeated-item set should be treated as
-a suspected leak until proven otherwise. Human beings only agree with themselves 0.612 of
-the time.
+Copy-forward and human test-retest are the same calculation here: `P(wave4 answer == same person's earlier answer)`. A model below population mode has not learned useful personalization. A model above copy-forward may be denoising, but only if leakage checks pass.
 
----
+Normalised score:
 
-## 6. Full-build acceptance criteria
+```text
+NS = (model - population_mode) / (copy_forward - population_mode)
+```
 
-Explicit, pre-registered criteria for the full LBM build, with the comparator attached.
-The bonus POC is not expected to satisfy these thresholds.
+NS = 0 means no personalization. NS = 1 means copy-forward level. NS > 1 suggests denoising.
 
-### Must pass (ship blockers)
+## 5. Distribution Metrics
 
-| # | Criterion | Threshold |
+A Large Behavior Model should preserve population behaviour, not only individual point accuracy.
+
+| Metric | Definition | Acceptance target |
 |---|---|---|
-| A1 | Beats B1 population mode on S2 | NS > 0.25, CI excludes 0 |
-| A2 | Variance ratio | 0.85 – 1.15 on S2 |
-| A3 | No leakage | `tests/test_no_leakage.py` green; no accuracy > 0.75 on repeated items |
-| A4 | Fairness | no demographic cell with n ≥ 100 scores more than 0.05 below the pooled mean |
-| A5 | Calibration | predicted-vs-observed frequency within ±0.05 in every decile |
+| variance ratio | median over columns of var(predicted) / var(human) | 0.85-1.15 |
+| marginal TV distance | per-item distance between predicted and human answer distributions | median < 0.10 |
+| calibration | predicted vs observed frequency by confidence decile | within +/-0.05 |
+| treatment-effect recovery | simulated experiment CI overlaps human experiment CI | >=80% of experiments |
 
-### Target (the actual goal)
+Treatment-effect recovery is a full-build metric. The current prototype scorer focuses on point accuracy and distribution summaries.
 
-| # | Criterion | Threshold |
+## 6. Train/Test Protocol
+
+| Split | Held out | Used for |
 |---|---|---|
-| T1 | **Beats copy-forward on S1** | NS > 1.0, CI excludes 1.0 — i.e. demonstrates denoising |
-| T2 | Beats the best shipped LLM (0.488) on the same 126 columns | CI excludes 0 |
-| T3 | Treatment-effect recovery | ≥ 80% of between-subject experiments' CIs overlap |
-| T4 | Marginal TV distance | median < 0.10 |
+| S1 person split | 20% of participants | repeated-item denoising on the assignment target |
+| S2 block-held-out split | held-out participants plus whole question blocks removed from persona and training targets | generalisation to unseen item families |
+| S3 demographic cells | age x sex x education slices | fairness and failure analysis |
 
-### Falsification
+Protocol:
 
-The plan in `reports/02_modeling_plan.md` §7 predicts that classical factorisation/IRT beats
-the LLM on C1. **That prediction is falsified if** a Tier-1 or Tier-2 LLM exceeds the Tier-0
-model's NS by more than 0.10 with a CI excluding 0 on S2. If that happens, the hybrid
-recommendation is wrong and the build should consolidate on the LM path. Stating this in
-advance is what makes the recommendation a hypothesis rather than a preference.
+1. Split by participant id, never by person-question pair.
+2. Use S2 for model selection and checkpoint choice.
+3. Report S1 because it matches the assignment's wave-4 target.
+4. Report S3 slices for any cell with n >= 100.
+5. Serialize fixed splits to `data/derived/splits.json` for the full build.
 
----
+Current prototype scope: the prototype uses a weaker held-out prompt construction. The target item is removed from the test person's prompt, but the same target item still appears in training examples for other people. The full build should implement the S2 dataset builder and write fixed splits to `data/derived/splits.json`.
 
-## 7. What I did not verify
+## 7. Leakage Controls
 
-Honesty items, since the assignment asks for them:
+Required controls:
 
-- The treatment-effect recovery metric is specified but not implemented; I have confirmed
-  the experiments exist in the catalog but have not computed a single effect size.
-- The S2 block-held-out split is specified as the right primary evaluation for a full LBM,
-  but this repository does not include `data/derived/splits.json` or an S2 dataset builder.
-  The POC `held_out` arm is weaker: it removes the target item from a person's prompt, but
-  the same target item can appear in training examples for other people.
-- The US population benchmarks in `reports/exploration/05_representativeness.md` are approximate ACS/CPS figures entered by
-  hand, adequate for showing direction and rough magnitude of skew, not for reweighting.
-- The POC (deliverable 6) tests the loop, not the plan. It is far too small to say anything
-  about whether Tier 2 would work at 7B.
+1. Ban `full_persona` from all modelling loaders.
+2. Use `wave_split` as the legal source of persona inputs.
+3. Strip all `Answers` fields from `wave4_Q_wave4_A` before showing wave-4 questions to a model.
+4. Treat `wave4_Q_wave1_3_A` as copy-forward baseline only, not model input.
+5. Split on participant id.
+6. Add string-match leakage tests for production prompts.
+7. Treat repeated-item accuracy above 0.75 as suspected leakage until audited.
+
+Current prototype scope: `tests/test_no_leakage.py` checks the prototype path for `full_persona` use, target-item prompt leakage, participant overlap, population-mode fitting, and copy-forward label direction. The full build should extend this to string-match every production prompt template.
+
+## 8. Acceptance Criteria
+
+Full LBM acceptance criteria:
+
+| Criterion | Threshold |
+|---|---|
+| beats population mode on S2 | NS > 0.25 and CI excludes 0 |
+| beats kNN / low-rank baseline on S2 | CI for delta excludes 0 |
+| binary option-order robustness | shuffled kappa within 0.02 of original; remapped consistency >=0.95 |
+| variance ratio | 0.85-1.15 |
+| marginal TV distance | median < 0.10 |
+| fairness | no n >= 100 demographic cell more than 0.05 below pooled score |
+| leakage | tests pass; no unexplained repeated-item accuracy above 0.75 |
+| S1 denoising target | NS > 1.0 against copy-forward, CI excludes 1.0 |
+
+The prototype is not expected to satisfy these thresholds. It checks the data pipeline, training loop, and scoring code end to end. S2 block-held-out evaluation, treatment-effect recovery, binary option-order shuffling, and full prompt string-match leakage tests are full-build evaluation requirements, not claims made by the current prototype.
