@@ -145,7 +145,7 @@ was sampled, once by the model's pull toward the modal answer.
 
 | # | Deliverable | Where |
 |---|---|---|
-| 1 | Data exploration report | [`reports/01_structure_and_retest.md`](reports/01_structure_and_retest.md), [`02_leakage_audit.md`](reports/02_leakage_audit.md), [`03_llm_baselines.md`](reports/03_llm_baselines.md), [`04_persona_budget.md`](reports/04_persona_budget.md), [`05_representativeness.md`](reports/05_representativeness.md), [`06_comparator_baselines.md`](reports/06_comparator_baselines.md) |
+| 1 | Data exploration report | [`docs/01_data_exploration.md`](docs/01_data_exploration.md), indexing generated reports [`reports/01`](reports/01_structure_and_retest.md)–[`06`](reports/06_comparator_baselines.md) |
 | 2 | Plan to build the model | [`docs/02_modeling_plan.md`](docs/02_modeling_plan.md) |
 | 3 | Evaluation strategy | [`docs/03_evaluation.md`](docs/03_evaluation.md) |
 | 4 | Business applications | [`docs/04_business_applications.md`](docs/04_business_applications.md) |
@@ -252,7 +252,7 @@ src/                       generated analysis (deliverable 1)
   06_figures.py                figures
   07_comparator_baselines.py   B2 demographic-cell and B3 kNN baselines
 reports/                   generated markdown reports, one per analysis script
-docs/                      deliverables 2-5 (written, not generated)
+docs/                      deliverable index plus written deliverables 2-5
 poc/                       POC data build, train, eval, and reported JSON result
 tests/test_no_leakage.py   leakage guards; run before believing any number
 figures/                   generated plots
