@@ -3,7 +3,7 @@
 This is the bonus prototype, not the proposed Large Behavior Model. The default
 SmolLM2-135M model is chosen because it runs end-to-end on a free Colab T4 and is large
 enough to validate the data, leakage guards, training loop, and evaluation ladder. The
-main modelling plan in docs/02_modeling_plan.md uses a 7B/8B-class model or a hybrid
+main modelling plan in reports/02_modeling_plan.md uses a 7B/8B-class model or a hybrid
 psychometric + LLM system.
 
 The answer is always a single digit, so the whole task collapses to predicting one token.

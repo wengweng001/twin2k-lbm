@@ -14,10 +14,10 @@ model and evaluation plan:
 
 | Measurement | Source | Consequence |
 |---|---|---|
-| 0 of 126 wave-4 columns are new questions | `reports/01` | The benchmark cannot test generalisation to unseen questions |
-| copy-forward accuracy 0.612 = the test-retest "ceiling" | `reports/01` | The trivial baseline and the ceiling are one number |
-| personalisation band 0.140, 95% CI [0.137, 0.144] | `reports/01` | Total available headroom is 14 accuracy points |
-| all 13 shipped LLM systems score below copy-forward | `reports/03` | Published SOTA has not cleared the trivial baseline |
+| 0 of 126 wave-4 columns are new questions | `reports/exploration/01_structure_and_retest.md` | The benchmark cannot test generalisation to unseen questions |
+| copy-forward accuracy 0.612 = the test-retest "ceiling" | `reports/exploration/01_structure_and_retest.md` | The trivial baseline and the ceiling are one number |
+| personalisation band 0.140, 95% CI [0.137, 0.144] | `reports/exploration/01_structure_and_retest.md` | Total available headroom is 14 accuracy points |
+| all 13 shipped LLM systems score below copy-forward | `reports/exploration/03_llm_baselines.md` | Published SOTA has not cleared the trivial baseline |
 
 So the LBM objective is decomposed into three separable capabilities, each with its own
 target:
@@ -30,7 +30,8 @@ target:
   provide a split for it. We construct one (§3.2).
 - **C3 — Preserve the distribution.** Reproduce population variance and inter-item
   correlation, not just per-person point accuracy. Median variance ratio across shipped
-  systems is 0.48 (`reports/03`): simulated populations are half as dispersed as real ones.
+  systems is 0.48 (`reports/exploration/03_llm_baselines.md`): simulated populations are
+  half as dispersed as real ones.
 
 C2 and C3 are where the product value is. C1 is where the benchmark is. Conflating them
 is the central evaluation risk in this assignment.
@@ -65,14 +66,14 @@ wave_split/            <- the ONLY legal source for personas
   wave1_3_persona_json    input (structured; preferred for retrieval)
   wave4_Q_wave1_3_A       copy-forward BASELINE — never an input
   wave4_Q_wave4_A         ground truth — strip every `Answers` key before use
-full_persona/          <- BANNED. Contains wave-4 answers (100.0% verified, reports/02)
+full_persona/          <- BANNED. Contains wave-4 answers (100.0% verified, reports/exploration/02_leakage_audit.md)
 ```
 
 The POC enforces the subset it implements with assertions, not convention: tests check that
 `full_persona` is not used, that the held-out prompt does not include the target item, that
 copy-forward stores the wave1-3 answer rather than the wave-4 answer, and that participant
 splits do not overlap. A production S2 pipeline should extend this to full string-level
-checks across every prompt template. See `docs/03_evaluation.md` §5.
+checks across every prompt template. See `reports/03_evaluation_strategy.md` §5.
 
 ### 3.2 Splits
 
@@ -82,7 +83,7 @@ Three splits, because they answer different questions:
 |---|---|---|---|
 | **S1 person** | 20% of pids | C1 denoising | Standard. Never split on (person, question) pairs — same person leaks. |
 | **S2 block** | 20% of pids × whole question *blocks* removed from the persona and from model selection/training targets | C2 generalisation | The block's items are absent from the persona and held out as target families. This is the split the dataset does not ship and the one that matters. |
-| **S3 cell** | stratified by demographic cell | fairness | Report per-cell, not pooled (`reports/05`). |
+| **S3 cell** | stratified by demographic cell | fairness | Report per-cell, not pooled (`reports/exploration/05_representativeness.md`). |
 
 For the full build, fixed splits should be written to `data/derived/splits.json` and
 committed, so every experiment scores on identical people and item blocks. This repo does
@@ -96,7 +97,7 @@ evaluable columns ≈ 259k pairs at the ceiling, minus between-subject arms the 
 saw — mean 96 answered columns per person, so ≈ 198k real pairs. For C2 we can additionally
 mine the 760 wave-1-3 columns as targets, giving ~1.5M pairs. That is ample for LoRA.
 
-Answers are normalised to a canonical form per question type (`reports/01` §2b): integer
+Answers are normalised to a canonical form per question type (`reports/exploration/01_structure_and_retest.md` §2b): integer
 index for MC, integer for Likert, float for continuous. The prompt states the valid range
 explicitly so decoding can be constrained.
 
@@ -105,13 +106,14 @@ explicitly so decoding can be constrained.
 ## 4. Handling the long persona
 
 A legal persona is **27,484 tokens** median, measured with a real BPE tokenizer rather than
-estimated (`reports/04`; the chars/4 rule of thumb understates it by 15%, because this text
-is structured and repetitive rather than prose). Four options, with the evidence for each:
+estimated (`reports/exploration/04_persona_budget.md`; the chars/4 rule of thumb understates
+it by 15%, because this text is structured and repetitive rather than prose). Four options,
+with the evidence for each:
 
 | Option | Cost | Evidence |
 |---|---|---|
 | Full persona in context | 27.5k tok/call; fits GPT-4.1 class, impossible for <0.5B | Best shipped system does this and still loses to copy-forward |
-| `persona_summary` (3.2k tok) | 7x cheaper | **Scores worse** — 0.448 vs 0.477 (`reports/03`). Compression is not free. |
+| `persona_summary` (3.2k tok) | 7x cheaper | **Scores worse** — 0.448 vs 0.477 (`reports/exploration/03_llm_baselines.md`). Compression is not free. |
 | **Retrieval by construct** | ~300–800 tok/question | Recommended. Not yet tried by the authors. |
 | Learned trait vector | fixed d-dim, no text | Recommended for the fine-tuned path. |
 
@@ -151,7 +153,8 @@ problem and the field has solved it:
 Why this tier is likely to beat the LLMs: the signal being exploited is cross-person
 correlation in a fixed item bank, which is precisely what factorisation is optimal for and
 precisely what an LLM has to rediscover from text. A simple kNN response-vector baseline
-already reaches **0.486** (`reports/06`), essentially tying the best shipped LLM at 0.488.
+already reaches **0.486** (`reports/exploration/06_comparator_baselines.md`), essentially
+tying the best shipped LLM at 0.488.
 IRT / low-rank factorisation is the better version of that idea, and it also gives the
 trait vector $\hat\theta_i$ that Tier 2 needs. If it captures more of the 14-point band,
 that is the headline result and the LLM becomes the thing you use only for C2 on genuinely
@@ -214,13 +217,13 @@ reaching for RLHF because it is fashionable.
 
 | Risk | Why it is live here | Mitigation |
 |---|---|---|
-| **Leakage via `full_persona`** | 100.0% of wave-4 answers present (`reports/02`) | Banned in the loader; POC tests forbid `full_persona` imports outside the audit; production S2 should add string-match checks on every prompt |
+| **Leakage via `full_persona`** | 100.0% of wave-4 answers present (`reports/exploration/02_leakage_audit.md`) | Banned in the loader; POC tests forbid `full_persona` imports outside the audit; production S2 should add string-match checks on every prompt |
 | **Leakage via the README snippet** | Ships input == ground truth | Strip `Answers` in the loader, not in the caller |
 | **Variance collapse** | Median ratio 0.48 across the 13 distinct systems | Sampled decoding, soft targets, temperature calibration, variance ratio as a *blocking* metric |
 | **Beating the benchmark without being useful** | Benchmark has 0 novel items | S2 block-held-out split is the primary reporting split |
 | **Pretraining contamination** | Public on HF since 2025; GPT-4.1/Gemini outputs shipped | Report open-weight models with known cutoffs; treat frontier-model prompting numbers as upper bounds of unknown validity |
 | **Overfitting a 14-point band** | Band CI is [0.137, 0.144] | Every reported delta carries a participant-level bootstrap CI; differences under ~0.01 are not claims |
-| **Sample non-representativeness** | Education TV distance 0.235 (`reports/05`) | Per-cell reporting; no claims about groups with thin support |
+| **Sample non-representativeness** | Education TV distance 0.235 (`reports/exploration/05_representativeness.md`) | Per-cell reporting; no claims about groups with thin support |
 | **Between-subject NaN treated as missing** | 76.2% mean coverage is structural | Per-column valid-pair metrics; never impute across arms |
 
 ---
@@ -236,4 +239,4 @@ reaching for RLHF because it is fashionable.
 The honest expected outcome: **Tier 0 wins on C1, the LLM earns its place only on C2**, and
 the deliverable worth shipping is a hybrid — factorisation for known items, LM for novel
 ones. I have not verified this; it is the hypothesis the build is designed to test, and
-`docs/03_evaluation.md` §6 states the criterion that would falsify it.
+`reports/03_evaluation_strategy.md` §6 states the criterion that would falsify it.

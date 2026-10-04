@@ -1,6 +1,6 @@
 """Persona size and context-window budget, plus sample representativeness.
 
-Produces reports/04_persona_budget.md
+Produces reports/exploration/04_persona_budget.md
 """
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from common import ROOT, column_meta, load_responses  # noqa: E402
 
-OUT_MD = ROOT / "reports/04_persona_budget.md"
+OUT_MD = ROOT / "reports/exploration/04_persona_budget.md"
 CHARS_PER_TOKEN = 4.0  # conservative English estimate; no tokenizer dependency
 
 

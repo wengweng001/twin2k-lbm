@@ -41,7 +41,7 @@ decode:            {n: 20, temperature: 1.0, seed: 0}
 Production rules:
 - **Never a floating model alias.** `gpt-4.1-mini` without a dated suffix is not a version.
 - The HF dataset revision is pinned by commit sha, because HF datasets are mutable.
-- Evaluation splits, including the S2 block-held-out split proposed in `docs/03_evaluation.md`,
+- Evaluation splits, including the S2 block-held-out split proposed in `reports/03_evaluation_strategy.md`,
   are committed once implemented, not regenerated. A regenerated split silently changes the
   test set.
 - Every metric in every report carries its `run_id`. A number without one is deleted, not
@@ -79,8 +79,8 @@ Everything above monitors *self-consistency*. Only new human data measures *corr
   will itself drift.
 - **Annual refresh wave.** Full re-administration to a 500-person subsample plus new
   recruits to correct composition.
-- **Continuous census re-benchmark.** When ACS/CPS updates, recompute `reports/05` and
-  re-check the panel's TV distances.
+- **Continuous census re-benchmark.** When ACS/CPS updates, recompute
+  `reports/exploration/05_representativeness.md` and re-check the panel's TV distances.
 
 ---
 
@@ -116,7 +116,7 @@ replace the guess.
 not inherited.
 
 **Model card**, updated per release: intended use, the §2 prohibitions from
-`docs/04_business_applications.md`, comparator-ladder scores, per-cell fairness table, panel
+`reports/04_business_applications.md`, comparator-ladder scores, per-cell fairness table, panel
 composition, known failure modes, expiry date.
 
 **Change review.** Prompt templates, splits and the comparator ladder are code-reviewed like

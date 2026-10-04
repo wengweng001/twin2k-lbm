@@ -3,7 +3,7 @@
 Claim under test: the `full_persona` config embeds the wave-4 ground truth, so any
 persona built from it scores against answers it was already shown.
 
-Produces reports/02_leakage_audit.md
+Produces reports/exploration/02_leakage_audit.md
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from common import ROOT, load_responses  # noqa: E402
 
-OUT_MD = ROOT / "reports/02_leakage_audit.md"
+OUT_MD = ROOT / "reports/exploration/02_leakage_audit.md"
 N_SAMPLE = 300
 
 

@@ -88,7 +88,7 @@ off in a predictable way; it is that **accuracy carries no information about
 whether the simulated population is correctly dispersed**. A leaderboard ranked on
 accuracy tells you nothing about the property that aggregate-level uses depend on.
 Variance therefore has to be measured and gated separately, not inferred — which is
-why `docs/03_evaluation.md` makes the variance ratio a ship blocker rather than a
+why `reports/03_evaluation_strategy.md` makes the variance ratio a ship blocker rather than a
 secondary metric.
 
 The mechanism is that predicting the modal answer is individually defensible and

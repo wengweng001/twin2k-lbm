@@ -1,6 +1,6 @@
 """Structure of the evaluation target + human test-retest reliability + trivial baselines.
 
-Produces reports/01_structure_and_retest.md and data/derived/per_column_retest.csv
+Produces reports/exploration/01_structure_and_retest.md and data/derived/per_column_retest.csv
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from common import ROOT, annotate_columns, bootstrap_ci, load_responses  # noqa: E402
 
-OUT_MD = ROOT / "reports/01_structure_and_retest.md"
+OUT_MD = ROOT / "reports/exploration/01_structure_and_retest.md"
 OUT_CSV = ROOT / "data/derived/per_column_retest.csv"
 N_BOOT = 1000
 OUT_CSV.parent.mkdir(parents=True, exist_ok=True)

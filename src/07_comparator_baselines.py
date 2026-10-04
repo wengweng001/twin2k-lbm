@@ -1,7 +1,7 @@
 """Additional comparator baselines for the natural wave1-3 -> wave4 task.
 
 Produces:
-  reports/06_comparator_baselines.md
+  reports/exploration/06_comparator_baselines.md
   data/derived/comparator_baselines.csv
 
 These are deliberately cheap non-LLM baselines. They answer the rubric question
@@ -18,7 +18,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from common import ROOT, annotate_columns, column_meta, load_responses  # noqa: E402
 
-OUT_MD = ROOT / "reports/06_comparator_baselines.md"
+OUT_MD = ROOT / "reports/exploration/06_comparator_baselines.md"
 OUT_CSV = ROOT / "data/derived/comparator_baselines.csv"
 K = 50
 MIN_CELL_N = 20

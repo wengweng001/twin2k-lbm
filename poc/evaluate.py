@@ -1,4 +1,4 @@
-"""Score the POC model against the comparator ladder from docs/03_evaluation.md.
+"""Score the POC model against the comparator ladder from reports/03_evaluation_strategy.md.
 
 Reports, on the same test participants and the same valid pairs:
   B1 population mode   (computed on TRAIN pids only)

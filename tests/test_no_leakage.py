@@ -1,6 +1,6 @@
 """Leakage guards. These are meant to break the build, not to be read in review.
 
-`docs/03_evaluation.md` §5 lists five leakage vectors. Three of them are mechanically
+`reports/03_evaluation_strategy.md` §5 lists five leakage vectors. Three of them are mechanically
 checkable and are checked here.
 
 Run:  python -m pytest tests/ -q      (or: python tests/test_no_leakage.py)
@@ -19,7 +19,7 @@ POC_DATA = ROOT / "poc/data"
 
 
 def test_full_persona_is_never_imported() -> None:
-    """Vector 1: full_persona embeds the wave-4 ground truth (100.0%, reports/02).
+    """Vector 1: full_persona embeds the wave-4 ground truth (100.0%, reports/exploration/02_leakage_audit.md).
 
     The audit script is the one legitimate reader; everything else must not touch it.
     """

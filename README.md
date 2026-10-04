@@ -19,9 +19,9 @@ organised around four steps:
 
 | What is evaluated | Where this repo addresses it |
 |---|---|
-| **Data sense** | `reports/01` shows wave 4 is entirely repeated items; `reports/02` audits the `full_persona` leakage trap; `reports/04` measures persona size; `reports/05` checks panel representativeness. |
-| **Technical judgment** | `docs/02_modeling_plan.md` proposes a modelling ladder: cheap psychometric baselines first, retrieval prompting second, fine-tuning only when it adds value. |
-| **Rigor on evaluation** | `docs/03_evaluation.md` starts with comparators, not metrics: population mode, demographic-cell mode, kNN, copy-forward, human test-retest, shipped LLMs. `reports/06` computes the cheap B2/B3 baselines. |
+| **Data sense** | `reports/01_data_exploration.md` indexes the exploration: wave 4 is entirely repeated items, `full_persona` is a leakage trap, legal personas are long, and the panel is skewed. |
+| **Technical judgment** | `reports/02_modeling_plan.md` proposes a modelling ladder: cheap psychometric baselines first, retrieval prompting second, fine-tuning only when it adds value. |
+| **Rigor on evaluation** | `reports/03_evaluation_strategy.md` starts with comparators, not metrics: population mode, demographic-cell mode, kNN, copy-forward, human test-retest, shipped LLMs. `reports/exploration/06_comparator_baselines.md` computes the cheap B2/B3 baselines. |
 | **Communication and honesty** | The README reports negative POC results directly; `Honest limitations` lists what was specified but not verified. |
 | **Bonus code quality** | `src/` regenerates reports and figures; `poc/` builds a leakage-checked slice, trains, and evaluates; `tests/test_no_leakage.py` is runnable before trusting any number. |
 
@@ -79,7 +79,7 @@ Only **4 of 13** beat the population mode at all, and the best does so by just +
 system is the worst at −0.058: materially worse than ignoring the persona entirely.
 (14 result folders ship, but two are byte-identical runs, so 13 distinct systems.)
 
-A cheap response-vector kNN baseline, added as B3 in `reports/06`, scores **0.486**.
+A cheap response-vector kNN baseline, added as B3 in `reports/exploration/06_comparator_baselines.md`, scores **0.486**.
 That is essentially tied with the best shipped LLM run (**0.488**) while using no language
 model at all. This is the strongest evidence that the modelling ladder should start with
 psychometric / matrix-completion baselines rather than jumping straight to an LLM.
@@ -116,7 +116,7 @@ A second trap sits in the dataset README's own usage snippet, where prompt input
 truth are the same field (`wave4_Q_wave4_A`) and the fix is easy to miss.
 
 Full audit — including split granularity, between-subject structure, and pretraining
-contamination — in [`reports/02_leakage_audit.md`](reports/02_leakage_audit.md).
+contamination — in [`reports/exploration/02_leakage_audit.md`](reports/exploration/02_leakage_audit.md).
 Enforcement is in [`tests/test_no_leakage.py`](tests/test_no_leakage.py), which breaks the
 build rather than relying on review. **It has already caught one real bug** in this repo's
 own POC prompt construction.
@@ -145,11 +145,11 @@ was sampled, once by the model's pull toward the modal answer.
 
 | # | Deliverable | Where |
 |---|---|---|
-| 1 | Data exploration report | [`docs/01_data_exploration.md`](docs/01_data_exploration.md), indexing generated reports [`reports/01`](reports/01_structure_and_retest.md)–[`06`](reports/06_comparator_baselines.md) |
-| 2 | Plan to build the model | [`docs/02_modeling_plan.md`](docs/02_modeling_plan.md) |
-| 3 | Evaluation strategy | [`docs/03_evaluation.md`](docs/03_evaluation.md) |
-| 4 | Business applications | [`docs/04_business_applications.md`](docs/04_business_applications.md) |
-| 5 | Long-run maintenance | [`docs/05_maintenance.md`](docs/05_maintenance.md) |
+| 1 | Data exploration report | [`reports/01_data_exploration.md`](reports/01_data_exploration.md), indexing generated appendices in [`reports/exploration/`](reports/exploration/01_structure_and_retest.md) |
+| 2 | Plan to build the model | [`reports/02_modeling_plan.md`](reports/02_modeling_plan.md) |
+| 3 | Evaluation strategy | [`reports/03_evaluation_strategy.md`](reports/03_evaluation_strategy.md) |
+| 4 | Business applications | [`reports/04_business_applications.md`](reports/04_business_applications.md) |
+| 5 | Long-run maintenance | [`reports/05_maintenance.md`](reports/05_maintenance.md) |
 | 6 | Proof-of-concept code | [`poc/build_dataset.py`](poc/build_dataset.py), [`poc/train.py`](poc/train.py), [`poc/evaluate.py`](poc/evaluate.py), [`poc/results_held_out.json`](poc/results_held_out.json) |
 
 ### Headlines from each
@@ -159,7 +159,7 @@ items (C2), preserve the distribution (C3). Only C1 is measurable on the shipped
 C2 and C3 are where the value is. Recommended build order puts a **classical
 IRT/low-rank baseline first** — the response matrix is 2,058 × 760 and this is a
 matrix-completion problem that psychometrics already solves — on the explicit hypothesis
-that it beats the LLMs at a fraction of the cost. `docs/03_evaluation.md` §6 states what
+that it beats the LLMs at a fraction of the cost. `reports/03_evaluation_strategy.md` §6 states what
 would falsify that.
 
 On context: a legal persona measures **27,484 tokens** median with a real BPE tokenizer
@@ -192,7 +192,7 @@ self-consistency.
 
 The reported POC result is a single Colab T4 run, not a comparison against a separate local
 run. It is intentionally **not** the proposed Large Behavior Model. The proposed real
-system in `docs/02_modeling_plan.md` uses a 7B/8B-class base model plus retrieval or a
+system in `reports/02_modeling_plan.md` uses a 7B/8B-class base model plus retrieval or a
 learned trait vector. The POC uses SmolLM2-135M because the bonus asks for a tiny prototype,
 and because a free Colab T4 can run it end-to-end quickly enough to validate the data
 pipeline, leakage controls, comparator ladder, and evaluation code.
@@ -251,8 +251,8 @@ src/                       generated analysis (deliverable 1)
   05_representativeness.py     panel vs US adult marginals
   06_figures.py                figures
   07_comparator_baselines.py   B2 demographic-cell and B3 kNN baselines
-reports/                   generated markdown reports, one per analysis script
-docs/                      deliverable index plus written deliverables 2-5
+reports/                   final report sections
+reports/exploration/       generated analysis appendices, one per analysis script
 poc/                       POC data build, train, eval, and reported JSON result
 tests/test_no_leakage.py   leakage guards; run before believing any number
 figures/                   generated plots
@@ -305,7 +305,7 @@ claim that a 135M model is a competitive LBM.
   direction and rough magnitude, not for reweighting.
 - The POC tests the loop, not the plan. It is three orders of magnitude too small to say
   anything about whether the Tier-2 design works at 7B, and it trains on hard labels —
-  the exact thing `docs/02_modeling_plan.md` §5.3 argues against. Its agreement with the
+  the exact thing `reports/02_modeling_plan.md` §5.3 argues against. Its agreement with the
   published fine-tuning failure is suggestive, not proof of a shared cause.
 - POC decoding is argmax, not sampled, so its variance ratio is a lower bound on what the
   same model could produce at temperature.

@@ -10,7 +10,7 @@ Two POC arms:
   arm B "held_out"   -- that answer is removed; only other items are shown.
                         Copying is impossible for that person. This is a no-copy
                         repeated-item POC, not the full S2 unseen-block split from
-                        docs/03_evaluation.md; target items still appear in training
+                        reports/03_evaluation_strategy.md; target items still appear in training
                         examples for other participants.
 
 Splits are on pid, never on (person, question).

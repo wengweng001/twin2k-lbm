@@ -42,7 +42,7 @@ about 12% of it.
 ## 2. Metrics by question type
 
 Qualtrics `QuestionType` does not determine the metric — the same `Matrix` type covers
-2-point and 100-point items. Classify by observed support (`reports/01` §2b):
+2-point and 100-point items. Classify by observed support (`reports/exploration/01_structure_and_retest.md` §2b):
 
 | Observed scale | Cols | Primary metric | Secondary | Why not accuracy alone |
 |---|---:|---|---|---|
@@ -144,7 +144,7 @@ distributional claim, and is the mechanical cause of the 0.48 variance ratio.
 
 ## 5. Leakage controls
 
-Five vectors, four verified in `reports/02`:
+Five vectors, four verified in `reports/exploration/02_leakage_audit.md`:
 
 1. **`full_persona` contains wave-4 ground truth.** Verified: 100.000% of wave-4 questions
    carry the exact wave-4 answer across 18,900 audited pairs. Banned at the loader.
@@ -199,7 +199,7 @@ The bonus POC is not expected to satisfy these thresholds.
 
 ### Falsification
 
-The plan in `docs/02_modeling_plan.md` §7 predicts that classical factorisation/IRT beats
+The plan in `reports/02_modeling_plan.md` §7 predicts that classical factorisation/IRT beats
 the LLM on C1. **That prediction is falsified if** a Tier-1 or Tier-2 LLM exceeds the Tier-0
 model's NS by more than 0.10 with a CI excluding 0 on S2. If that happens, the hybrid
 recommendation is wrong and the build should consolidate on the LM path. Stating this in
@@ -217,7 +217,7 @@ Honesty items, since the assignment asks for them:
   but this repository does not include `data/derived/splits.json` or an S2 dataset builder.
   The POC `held_out` arm is weaker: it removes the target item from a person's prompt, but
   the same target item can appear in training examples for other people.
-- The US population benchmarks in `reports/05` are approximate ACS/CPS figures entered by
+- The US population benchmarks in `reports/exploration/05_representativeness.md` are approximate ACS/CPS figures entered by
   hand, adequate for showing direction and rough magnitude of skew, not for reweighting.
 - The POC (deliverable 6) tests the loop, not the plan. It is far too small to say anything
   about whether Tier 2 would work at 7B.

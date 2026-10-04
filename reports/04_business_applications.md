@@ -31,7 +31,7 @@ offices, anyone running a panel.
 broken items before fielding pays for the system.
 
 **Acceptance bar:** T3 (treatment-effect recovery ≥ 80%) and T4 (TV < 0.10) from
-`docs/03_evaluation.md`. Below that bar it is not fit for this use.
+`reports/03_evaluation_strategy.md`. Below that bar it is not fit for this use.
 
 ### 1.2 Experiment power analysis and design
 
@@ -48,8 +48,9 @@ built.
 **The job:** narrow 40 product concepts to 8 worth testing with real people.
 
 **Why it fits:** the pricing block is 40 of the 126 evaluated columns, and it is where
-personalisation signal is strongest — the largest B1→B4 gaps in `reports/01` are pricing
-items (+0.29 to +0.31 versus +0.14 overall).
+personalisation signal is strongest — the largest B1→B4 gaps in
+`reports/exploration/01_structure_and_retest.md` are pricing items (+0.29 to +0.31 versus
++0.14 overall).
 
 **Framing that keeps it honest:** a *screening* tool that reduces the candidate set, with
 the survivors always validated on humans. Never a replacement for the confirmatory test.
@@ -95,7 +96,7 @@ These are not risk-management boilerplate; each maps to a specific measurement.
    audit-logged.
 4. **Population card on every output.** Every result carries the panel's composition and
    its deviation from the population the customer thinks they are studying — the table from
-   `reports/05`, attached automatically.
+   `reports/exploration/05_representativeness.md`, attached automatically.
 5. **Provenance.** Synthetic responses are tagged in every export so they cannot be
    silently merged into a real dataset. This is the single highest-value guardrail: the
    realistic catastrophic failure here is not a bad prediction, it is simulated data
@@ -116,7 +117,7 @@ plausibly re-identifying by combination. Concretely:
 - Operate on the aggregate, and treat individual personas as restricted data under the
   original research ethics approval.
 - Honour deletion requests through to retraining, not just from the serving index — which
-  means the retraining cadence in `docs/05_maintenance.md` is a compliance requirement, not
+  means the retraining cadence in `reports/05_maintenance.md` is a compliance requirement, not
   only an accuracy one.
 
 ---

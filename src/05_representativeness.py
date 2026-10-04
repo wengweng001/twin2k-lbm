@@ -3,7 +3,7 @@
 Answers deliverable 1's 'distributions and representativeness' requirement: who is this
 panel, and who does a model trained on it therefore speak for?
 
-Produces reports/05_representativeness.md and data/derived/representativeness.csv
+Produces reports/exploration/05_representativeness.md and data/derived/representativeness.csv
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from common import ROOT, US_BENCHMARKS, load_responses  # noqa: E402
 
-OUT_MD = ROOT / "reports/05_representativeness.md"
+OUT_MD = ROOT / "reports/exploration/05_representativeness.md"
 OUT_CSV = ROOT / "data/derived/representativeness.csv"
 
 # Demographic QIDs -> benchmark key. Region/race labels are long; matched on prefix.

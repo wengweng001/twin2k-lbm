@@ -3,7 +3,7 @@
 The question this answers: do the published digital-twin approaches beat the
 trivial copy-forward baseline, and do they reproduce human response variance?
 
-Produces reports/03_llm_baselines.md and data/derived/spec_scores.csv
+Produces reports/exploration/03_llm_baselines.md and data/derived/spec_scores.csv
 """
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ import pandas as pd
 sys.path.insert(0, str(Path(__file__).parent))
 from common import ROOT, SIM_DIR, bootstrap_ci  # noqa: E402
 
-OUT_MD = ROOT / "reports/03_llm_baselines.md"
+OUT_MD = ROOT / "reports/exploration/03_llm_baselines.md"
 OUT_CSV = ROOT / "data/derived/spec_scores.csv"
 N_BOOT = 400
 
@@ -194,7 +194,7 @@ def main() -> None:
     A("whether the simulated population is correctly dispersed**. A leaderboard ranked on")
     A("accuracy tells you nothing about the property that aggregate-level uses depend on.")
     A("Variance therefore has to be measured and gated separately, not inferred — which is")
-    A("why `docs/03_evaluation.md` makes the variance ratio a ship blocker rather than a")
+    A("why `reports/03_evaluation_strategy.md` makes the variance ratio a ship blocker rather than a")
     A("secondary metric.\n")
     A("The mechanism is that predicting the modal answer is individually defensible and")
     A("collectively wrong: it costs little accuracy while erasing the distribution.\n")
